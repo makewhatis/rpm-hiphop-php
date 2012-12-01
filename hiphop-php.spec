@@ -1,6 +1,6 @@
 Name:             hiphop-php
 Version:          0.1.0
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          Source code transformer from PHP to C++
 
 Group:            System Environment/Libraries
@@ -46,7 +46,7 @@ There is no OS X support.
 
 %prep
 %setup -qn hiphop-php
-%patch01  
+#%patch01  # Remove before production
 
 %build
 export CMAKE_PREFIX_PATH=/usr
@@ -56,21 +56,61 @@ export USE_HHVM=1
 export CC=gcc
 export CXX=g++
 
-cmake . 
-make 
+#cmake . 
+#make 
 
 
 %install
-%{__mkdir_p} $RPM_BUILD_ROOT/%{_sbindir}
-install bin/systemlib.php $RPM_BUILD_ROOT/%{_sbindir}/systemlib.php
-install src/hhvm/hhvm $RPM_BUILD_ROOT/%{_sbindir}/hhvm
-install src/hphp/hphp $RPM_BUILD_ROOT/%{_sbindir}/hhvm-analyze
+%{__mkdir_p} $RPM_BUILD_ROOT%{_sbindir}
+%{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}/lib
+%{__mkdir_p} $RPM_BUILD_ROOT%{_includedir}
+%{__mkdir_p} $RPM_BUILD_ROOT%{_localstatedir}/www/hiphop
+%{__mkdir_p} $RPM_BUILD_ROOT%{_localstatedir}/log/hhvm
+
+install bin/systemlib.php $RPM_BUILD_ROOT%{_sbindir}/systemlib.php
+install src/hhvm/hhvm $RPM_BUILD_ROOT%{_sbindir}/hhvm
+install src/hphp/hphp $RPM_BUILD_ROOT%{_sbindir}/hhvm-analyze
+install bin/libxhp.a $RPM_BUILD_ROOT%{_prefix}/lib/
+install bin/libafdt.a $RPM_BUILD_ROOT%{_prefix}/lib/
+install src/third_party/libafdt/src/afdt.h  $RPM_BUILD_ROOT%{_includedir}/
+install bin/libsqlite3.a $RPM_BUILD_ROOT%{_prefix}/lib/
+install src/third_party/libsqlite3/sqlite3.h $RPM_BUILD_ROOT%{_includedir}/
+install bin/libtimelib.a $RPM_BUILD_ROOT%{_prefix}/lib/
+install src/third_party/timelib/timelib.h $RPM_BUILD_ROOT%{_includedir}/
+install src/third_party/timelib/timelib_structs.h $RPM_BUILD_ROOT%{_includedir}/
+install src/third_party/timelib/timelib_config.h $RPM_BUILD_ROOT%{_includedir}/
+
+
+%pre
+/usr/bin/id hiphop &> /dev/null
+RETVAL=`echo $?`
+
+if [ $RETVAL -gt 0 ]; then
+    /usr/sbin/groupadd -g 113 hiphop &> /dev/null
+    /usr/sbin/useradd -u 113 -g 113 -d /var/www/hiphop -s /sbin/nologin -r hiphop &> /dev/null
+fi
+
+%preun
+/usr/bin/id hiphop &> /dev/null
+RETVAL=`echo $?`
+
+if [ $RETVAL -eq 0 ]; then
+    /usr/sbin/userdel hiphop &> /dev/null
+    #/usr/sbin/groupdel hiphop &> /dev/null
+fi
 
 
 %files
 %defattr(-,root,root,0755)
 %{_sbindir}
 
+%defattr(-,hiphop,hiphop,0755)
+%{_localstatedir}/www/hiphop
+%{_localstatedir}/log/hhvm
+
+%defattr(-,root,root,-)
+%{_prefix}/lib
+%{_includedir}
 
 %changelog
 * Thu Nov 29 2012 David Johansen <david@makewhatis.com> 0.1.0-1
