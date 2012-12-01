@@ -1,6 +1,6 @@
 Name:             hiphop-php
 Version:          0.1.0
-Release:          2%{?dist}
+Release:          5%{?dist}
 Summary:          Source code transformer from PHP to C++
 
 Group:            System Environment/Libraries
@@ -66,6 +66,8 @@ export CXX=g++
 %{__mkdir_p} $RPM_BUILD_ROOT%{_includedir}
 %{__mkdir_p} $RPM_BUILD_ROOT%{_localstatedir}/www/hiphop
 %{__mkdir_p} $RPM_BUILD_ROOT%{_localstatedir}/log/hhvm
+%{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
+%{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/init.d
 
 install bin/systemlib.php $RPM_BUILD_ROOT%{_sbindir}/systemlib.php
 install src/hhvm/hhvm $RPM_BUILD_ROOT%{_sbindir}/hhvm
@@ -79,6 +81,8 @@ install bin/libtimelib.a $RPM_BUILD_ROOT%{_prefix}/lib/
 install src/third_party/timelib/timelib.h $RPM_BUILD_ROOT%{_includedir}/
 install src/third_party/timelib/timelib_structs.h $RPM_BUILD_ROOT%{_includedir}/
 install src/third_party/timelib/timelib_config.h $RPM_BUILD_ROOT%{_includedir}/
+touch $RPM_BUILD_ROOT%{_sysconfdir}/init.d/hhvm
+touch $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/hhvm
 
 
 %pre
@@ -88,15 +92,6 @@ RETVAL=`echo $?`
 if [ $RETVAL -gt 0 ]; then
     /usr/sbin/groupadd -g 113 hiphop &> /dev/null
     /usr/sbin/useradd -u 113 -g 113 -d /var/www/hiphop -s /sbin/nologin -r hiphop &> /dev/null
-fi
-
-%preun
-/usr/bin/id hiphop &> /dev/null
-RETVAL=`echo $?`
-
-if [ $RETVAL -eq 0 ]; then
-    /usr/sbin/userdel hiphop &> /dev/null
-    #/usr/sbin/groupdel hiphop &> /dev/null
 fi
 
 
@@ -111,6 +106,9 @@ fi
 %defattr(-,root,root,-)
 %{_prefix}/lib
 %{_includedir}
+%{_sysconfdir}/init.d/hhvm
+%{_sysconfdir}/sysconfig/hhvm
+
 
 %changelog
 * Thu Nov 29 2012 David Johansen <david@makewhatis.com> 0.1.0-1
