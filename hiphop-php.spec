@@ -1,13 +1,14 @@
 Name:             hiphop-php
 Version:          0.1.0
-Release:          5%{?dist}
+Release:          11%{?dist}
 Summary:          Source code transformer from PHP to C++
 
 Group:            System Environment/Libraries
 License:          GPLv2 with linking exception
 URL:              https://github.com/facebook/hiphop-php
 Source0:          %{name}-%{version}.tar.gz
-Prefix:		  /usr/local
+Source1:	  hhvm.init
+Source2:	  hhvm.sysconfig
 
 Requires:	   boost >= 1.5.0
 Requires:	   libunwind >= 1.0.0
@@ -66,8 +67,10 @@ export CXX=g++
 %{__mkdir_p} $RPM_BUILD_ROOT%{_includedir}
 %{__mkdir_p} $RPM_BUILD_ROOT%{_localstatedir}/www/hiphop
 %{__mkdir_p} $RPM_BUILD_ROOT%{_localstatedir}/log/hhvm
+%{__mkdir_p} $RPM_BUILD_ROOT%{_localstatedir}/run/hhvm
 %{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
 %{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/init.d
+%{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/hhvm
 
 install bin/systemlib.php $RPM_BUILD_ROOT%{_sbindir}/systemlib.php
 install src/hhvm/hhvm $RPM_BUILD_ROOT%{_sbindir}/hhvm
@@ -81,8 +84,8 @@ install bin/libtimelib.a $RPM_BUILD_ROOT%{_prefix}/lib/
 install src/third_party/timelib/timelib.h $RPM_BUILD_ROOT%{_includedir}/
 install src/third_party/timelib/timelib_structs.h $RPM_BUILD_ROOT%{_includedir}/
 install src/third_party/timelib/timelib_config.h $RPM_BUILD_ROOT%{_includedir}/
-touch $RPM_BUILD_ROOT%{_sysconfdir}/init.d/hhvm
-touch $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/hhvm
+install %{SOURCE1}  $RPM_BUILD_ROOT%{_sysconfdir}/init.d/hhvm
+install %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/hhvm
 
 
 %pre
@@ -94,6 +97,8 @@ if [ $RETVAL -gt 0 ]; then
     /usr/sbin/useradd -u 113 -g 113 -d /var/www/hiphop -s /sbin/nologin -r hiphop &> /dev/null
 fi
 
+%post
+/sbin/chkconfig --add  hhvm &> /dev/null
 
 %files
 %defattr(-,root,root,0755)
@@ -102,12 +107,15 @@ fi
 %defattr(-,hiphop,hiphop,0755)
 %{_localstatedir}/www/hiphop
 %{_localstatedir}/log/hhvm
+%{_localstatedir}/run/hhvm
+%{_sysconfdir}/hhvm
+
 
 %defattr(-,root,root,-)
 %{_prefix}/lib
 %{_includedir}
 %{_sysconfdir}/init.d/hhvm
-%{_sysconfdir}/sysconfig/hhvm
+%config(noreplace) %{_sysconfdir}/sysconfig/hhvm
 
 
 %changelog
