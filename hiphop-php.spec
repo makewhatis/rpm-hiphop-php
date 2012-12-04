@@ -1,6 +1,6 @@
 Name:             hiphop-php
-Version:          0.1.0
-Release:          13%{?dist}
+Version:          0.1.1
+Release:          2%{?dist}
 Summary:          Source code transformer from PHP to C++
 
 Group:            System Environment/Libraries
@@ -49,7 +49,7 @@ There is no OS X support.
 
 %prep
 %setup -qn hiphop-php
-#%patch01  # Remove before production
+%patch01
 
 %build
 export CMAKE_PREFIX_PATH=/usr
@@ -59,8 +59,8 @@ export USE_HHVM=1
 export CC=gcc
 export CXX=g++
 
-#cmake . 
-#make 
+cmake . 
+make 
 
 
 %install
