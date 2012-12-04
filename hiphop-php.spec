@@ -1,6 +1,6 @@
 Name:             hiphop-php
 Version:          0.1.0
-Release:          11%{?dist}
+Release:          12%{?dist}
 Summary:          Source code transformer from PHP to C++
 
 Group:            System Environment/Libraries
@@ -9,6 +9,7 @@ URL:              https://github.com/facebook/hiphop-php
 Source0:          %{name}-%{version}.tar.gz
 Source1:	  hhvm.init
 Source2:	  hhvm.sysconfig
+Source3:	  hhvm.profile
 
 Requires:	   boost >= 1.5.0
 Requires:	   libunwind >= 1.0.0
@@ -71,6 +72,9 @@ export CXX=g++
 %{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
 %{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/init.d
 %{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/hhvm
+%{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
+%{__mkdir_p} $RPM_BUILD_ROOT%{_usrsrc}/hiphop/src/system/globals
+%{__mkdir_p} $RPM_BUILD_ROOT%{_usrsrc}/hiphop/src/system/classes
 
 install bin/systemlib.php $RPM_BUILD_ROOT%{_sbindir}/systemlib.php
 install src/hhvm/hhvm $RPM_BUILD_ROOT%{_sbindir}/hhvm
@@ -86,6 +90,10 @@ install src/third_party/timelib/timelib_structs.h $RPM_BUILD_ROOT%{_includedir}/
 install src/third_party/timelib/timelib_config.h $RPM_BUILD_ROOT%{_includedir}/
 install %{SOURCE1}  $RPM_BUILD_ROOT%{_sysconfdir}/init.d/hhvm
 install %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/hhvm
+install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/hhvm.sh
+install src/system/classes/*.php $RPM_BUILD_ROOT%{_usrsrc}/hiphop/src/system/classes/
+install src/system/globals/*.php $RPM_BUILD_ROOT%{_usrsrc}/hiphop/src/system/globals
+
 
 
 %pre
@@ -115,7 +123,10 @@ fi
 %{_prefix}/lib
 %{_includedir}
 %{_sysconfdir}/init.d/hhvm
+%{_sysconfdir}/profile.d/hhvm.sh
 %config(noreplace) %{_sysconfdir}/sysconfig/hhvm
+%{_usrsrc}/hiphop/src/system/globals
+%{_usrsrc}/hiphop/src/system/classes
 
 
 %changelog
